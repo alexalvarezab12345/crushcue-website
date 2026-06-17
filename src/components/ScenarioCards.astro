@@ -1,0 +1,75 @@
+---
+interface Card {
+  label: string;
+  description: string;
+}
+
+interface Props {
+  cards: Card[];
+  heading?: string;
+}
+
+const { cards, heading = 'Common versions of this situation' } = Astro.props;
+if (!cards?.length) return;
+---
+
+<div class="scenarios-wrapper">
+  <p class="scenarios-heading">{heading}</p>
+  <div class="scenarios-grid">
+    {cards.map(card => (
+      <div class="scenario-card">
+        <p class="scenario-label">{card.label}</p>
+        <p class="scenario-desc">{card.description}</p>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .scenarios-wrapper {
+    margin: 36px 0;
+  }
+
+  .scenarios-heading {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 0 0 12px;
+  }
+
+  .scenarios-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .scenario-card {
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .scenario-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 6px;
+    line-height: 1.35;
+  }
+
+  .scenario-desc {
+    font-size: 12.5px;
+    color: var(--dim);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  @media (max-width: 520px) {
+    .scenarios-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

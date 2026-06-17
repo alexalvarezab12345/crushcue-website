@@ -12,14 +12,32 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const { title, metaTitle, metaDescription, status, ctaPrelude } = entry.data;
+const {
+  title,
+  metaTitle,
+  metaDescription,
+  status,
+  publishedDate,
+  ctaPrelude,
+  conversationExample,
+  analysisCard,
+  scenarioCards,
+  relatedSlugs,
+  socialProofNote,
+} = entry.data;
 const noindex = status !== 'published';
 ---
 <SEOPage
   title={metaTitle ?? title}
   description={metaDescription}
   noindex={noindex}
+  publishedDate={publishedDate}
   ctaPrelude={ctaPrelude}
+  conversationExample={conversationExample}
+  analysisCard={analysisCard}
+  scenarioCards={scenarioCards}
+  relatedSlugs={relatedSlugs}
+  socialProofNote={socialProofNote}
 >
   <Content />
 </SEOPage>

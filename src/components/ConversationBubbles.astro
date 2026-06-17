@@ -1,0 +1,102 @@
+---
+interface Turn {
+  sender: 'you' | 'them';
+  text: string;
+}
+
+interface Props {
+  turns: Turn[];
+}
+
+const { turns } = Astro.props;
+if (!turns?.length) return;
+
+// Split into display segments — a trailing empty "them" turn becomes a seen indicator
+const lastTurn = turns[turns.length - 1];
+const hasSeenIndicator = lastTurn.sender === 'them' && lastTurn.text === '';
+const displayTurns = hasSeenIndicator ? turns.slice(0, -1) : turns;
+---
+
+<div class="chat-wrapper">
+  <p class="chat-label">Does this look familiar?</p>
+  <div class="chat-window">
+    {displayTurns.map(turn => (
+      <div class={`bubble-row ${turn.sender}`}>
+        <div class="bubble">{turn.text}</div>
+      </div>
+    ))}
+    {hasSeenIndicator && <p class="seen-label">Seen</p>}
+  </div>
+</div>
+
+<style>
+  .chat-wrapper {
+    margin: 0 0 32px;
+  }
+
+  .chat-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 0 0 10px;
+  }
+
+  .chat-window {
+    background: rgba(15, 15, 20, 0.7);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bubble-row {
+    display: flex;
+  }
+
+  .bubble-row.you {
+    justify-content: flex-end;
+  }
+
+  .bubble-row.them {
+    justify-content: flex-start;
+  }
+
+  .bubble {
+    max-width: 72%;
+    padding: 9px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+
+  .bubble-row.you .bubble {
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+
+  .bubble-row.them .bubble {
+    background: var(--surface-2);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+  }
+
+  .seen-label {
+    text-align: right;
+    font-size: 11px;
+    color: var(--dim);
+    margin: 2px 4px 0;
+  }
+
+  @media (max-width: 640px) {
+    .bubble {
+      max-width: 84%;
+      font-size: 13.5px;
+    }
+  }
+</style>

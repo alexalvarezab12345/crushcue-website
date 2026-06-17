@@ -1,34 +1,105 @@
 ---
 import Base from './Base.astro';
+import ConversationBubbles from '../components/ConversationBubbles.astro';
+import AnalysisCard from '../components/AnalysisCard.astro';
+import ScenarioCards from '../components/ScenarioCards.astro';
+import StickyMobileCTA from '../components/StickyMobileCTA.astro';
+import RelatedSituations from '../components/RelatedSituations.astro';
+import { getCollection } from 'astro:content';
 
 interface Props {
   title: string;
   description?: string;
   noindex?: boolean;
+  publishedDate?: string;
   ctaPrelude?: string;
+  conversationExample?: Array<{ sender: 'you' | 'them'; text: string }>;
+  analysisCard?: { signal: string; confidence: 'high' | 'medium' | 'low'; insight: string; recommendation: string };
+  scenarioCards?: Array<{ label: string; description: string }>;
+  relatedSlugs?: string[];
+  socialProofNote?: string;
 }
 
-const { title, description, noindex = false, ctaPrelude } = Astro.props;
+const {
+  title,
+  description,
+  noindex = false,
+  publishedDate,
+  ctaPrelude,
+  conversationExample,
+  analysisCard,
+  scenarioCards,
+  relatedSlugs,
+  socialProofNote,
+} = Astro.props;
+
+// Hydrate related slugs into entries at build time — fully static
+let relatedEntries: Array<{ id: string; title: string; metaDescription?: string }> = [];
+if (relatedSlugs?.length) {
+  const all = await getCollection('seo');
+  relatedEntries = all
+    .filter(e => relatedSlugs.includes(e.id))
+    .map(e => ({ id: e.id, title: e.data.title, metaDescription: e.data.metaDescription }));
+}
 ---
+
 <Base title={title} description={description} noindex={noindex}>
   <main class="container">
     <a class="back-link" href="/">← Back to CrushCue</a>
     <article class="card">
+
+      <header class="page-header">
+        <h1 class="page-title">{title}</h1>
+        {publishedDate && (
+          <p class="byline">By CrushCue Editorial Team — Published {publishedDate}</p>
+        )}
+      </header>
+
+      {conversationExample?.length && (
+        <ConversationBubbles turns={conversationExample} />
+      )}
+
       <div class="prose">
         <slot />
       </div>
+
+      {scenarioCards?.length && (
+        <ScenarioCards cards={scenarioCards} />
+      )}
+
+      {analysisCard && (
+        <AnalysisCard
+          signal={analysisCard.signal}
+          confidence={analysisCard.confidence}
+          insight={analysisCard.insight}
+          recommendation={analysisCard.recommendation}
+        />
+      )}
+
+      {socialProofNote && (
+        <p class="social-proof">{socialProofNote}</p>
+      )}
+
       {ctaPrelude && (
         <div class="cta-box">
           <p class="cta-body">{ctaPrelude}</p>
           <a class="cta-button" href="/">Try CrushCue — Free</a>
         </div>
       )}
+
+      {relatedEntries.length > 0 && (
+        <RelatedSituations entries={relatedEntries} />
+      )}
+
       <div class="footer-links">
         <a href="/privacy">Privacy Policy</a>
         <a href="/terms">Terms of Service</a>
       </div>
+
     </article>
   </main>
+
+  <StickyMobileCTA />
 </Base>
 
 <style>
@@ -57,11 +128,15 @@ const { title, description, noindex = false, ctaPrelude } = Astro.props;
     backdrop-filter: blur(18px);
   }
 
-  /* ── Prose: MDX content ── */
+  /* ── Page header (H1 + byline rendered from frontmatter) ── */
+  .page-header {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
 
-  /* Article title */
-  .prose :global(h1) {
-    margin: 0 0 6px;
+  .page-title {
+    margin: 0 0 8px;
     font-size: 30px;
     font-weight: 700;
     letter-spacing: -0.04em;
@@ -69,18 +144,14 @@ const { title, description, noindex = false, ctaPrelude } = Astro.props;
     color: var(--text);
   }
 
-  /* Byline: _By CrushCue Editorial Team — Published …_ */
-  .prose :global(h1 + p) {
-    margin: 0 0 28px;
-    padding-bottom: 28px;
-    border-bottom: 1px solid var(--border);
+  .byline {
+    margin: 0;
     font-size: 13px;
     color: var(--dim);
     font-style: italic;
-    line-height: 1.5;
   }
 
-  /* Section headings */
+  /* ── Prose: MDX content (starts at ## The Short Answer) ── */
   .prose :global(h2) {
     margin: 36px 0 12px;
     font-size: 18px;
@@ -90,7 +161,6 @@ const { title, description, noindex = false, ctaPrelude } = Astro.props;
     color: var(--text);
   }
 
-  /* Subsection labels (e.g. ### Example openers) */
   .prose :global(h3) {
     margin: 24px 0 8px;
     font-size: 13px;
@@ -100,7 +170,6 @@ const { title, description, noindex = false, ctaPrelude } = Astro.props;
     color: var(--primary);
   }
 
-  /* Body text */
   .prose :global(p) {
     margin: 0 0 16px;
     font-size: 15px;
@@ -108,7 +177,7 @@ const { title, description, noindex = false, ctaPrelude } = Astro.props;
     line-height: 1.75;
   }
 
-  /* FAQ questions: **bold question** as its own paragraph */
+  /* FAQ questions: **bold question** as standalone paragraph */
   .prose :global(p > strong:only-child) {
     display: block;
     font-size: 15px;
@@ -117,7 +186,6 @@ const { title, description, noindex = false, ctaPrelude } = Astro.props;
     margin-bottom: 4px;
   }
 
-  /* Lists */
   .prose :global(ul) {
     list-style: none;
     padding: 0;
@@ -133,7 +201,6 @@ const { title, description, noindex = false, ctaPrelude } = Astro.props;
     line-height: 1.6;
   }
 
-  /* Dash bullet via pseudo-element */
   .prose :global(li)::before {
     content: "—";
     position: absolute;
@@ -142,15 +209,23 @@ const { title, description, noindex = false, ctaPrelude } = Astro.props;
     font-weight: 700;
   }
 
-  /* Bold scenario labels inside list items */
   .prose :global(li > strong) {
     color: var(--text);
     font-weight: 700;
   }
 
+  /* ── Social proof ── */
+  .social-proof {
+    margin: 32px 0 0;
+    font-size: 13px;
+    color: var(--dim);
+    font-style: italic;
+    text-align: center;
+  }
+
   /* ── CTA box ── */
   .cta-box {
-    margin-top: 40px;
+    margin-top: 28px;
     padding: 24px 28px;
     background: rgba(167, 139, 250, 0.08);
     border: 1px solid rgba(167, 139, 250, 0.2);
@@ -202,7 +277,7 @@ const { title, description, noindex = false, ctaPrelude } = Astro.props;
   /* ── Mobile ── */
   @media (max-width: 640px) {
     .container {
-      padding: 28px 16px 56px;
+      padding: 28px 16px 80px;
     }
 
     .card {
@@ -210,7 +285,7 @@ const { title, description, noindex = false, ctaPrelude } = Astro.props;
       border-radius: 20px;
     }
 
-    .prose :global(h1) {
+    .page-title {
       font-size: 24px;
     }
 

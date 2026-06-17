@@ -14,7 +14,24 @@ const seo = defineCollection({
     opportunityId: z.string().optional(),
     status: z.enum(['draft', 'published']).default('draft'),
     generatedAt: z.string().optional(),
+    publishedDate: z.string().optional(),
     ctaPrelude: z.string().optional(),
+    conversationExample: z.array(z.object({
+      sender: z.enum(['you', 'them']),
+      text: z.string(),
+    })).optional(),
+    analysisCard: z.object({
+      signal: z.string(),
+      confidence: z.enum(['high', 'medium', 'low']),
+      insight: z.string(),
+      recommendation: z.string(),
+    }).optional(),
+    scenarioCards: z.array(z.object({
+      label: z.string(),
+      description: z.string(),
+    })).optional(),
+    relatedSlugs: z.array(z.string()).optional(),
+    socialProofNote: z.string().optional(),
   }),
 });
 

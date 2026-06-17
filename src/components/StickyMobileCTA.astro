@@ -1,0 +1,84 @@
+---
+interface Props {
+  label?: string;
+}
+
+const { label = 'Stop guessing. Get a read.' } = Astro.props;
+---
+
+<div class="sticky-cta" id="sticky-mobile-cta">
+  <span class="sticky-label">{label}</span>
+  <a class="sticky-button" href="/">Try CrushCue Free</a>
+</div>
+
+<script>
+  const bar = document.getElementById('sticky-mobile-cta');
+  const mainCta = document.querySelector('.cta-box');
+
+  if (bar && mainCta) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        bar.classList.toggle('hidden', entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(mainCta);
+  }
+</script>
+
+<style>
+  .sticky-cta {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    background: rgba(15, 15, 20, 0.96);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(16px);
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+
+  .sticky-cta.hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .sticky-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sticky-button {
+    display: inline-block;
+    padding: 9px 18px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 999px;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 767px) {
+    .sticky-cta {
+      display: flex;
+    }
+  }
+</style>

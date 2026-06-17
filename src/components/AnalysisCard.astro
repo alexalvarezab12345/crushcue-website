@@ -1,0 +1,146 @@
+---
+interface Props {
+  signal: string;
+  confidence: 'high' | 'medium' | 'low';
+  insight: string;
+  recommendation: string;
+}
+
+const { signal, confidence, insight, recommendation } = Astro.props;
+
+const confidenceLevel = confidence === 'high' ? 3 : confidence === 'medium' ? 2 : 1;
+const confidenceLabel = confidence === 'high' ? 'Strong signal' : confidence === 'medium' ? 'Likely signal' : 'Possible signal';
+---
+
+<div class="analysis-card">
+  <div class="card-header">
+    <span class="wordmark">CrushCue</span>
+    <span class="preview-label">Analysis Preview</span>
+  </div>
+
+  <div class="signal-row">
+    <span class="signal-pill">{signal}</span>
+    <div class="confidence" aria-label={confidenceLabel}>
+      {[1,2,3].map(n => (
+        <span class={`dot ${n <= confidenceLevel ? 'filled' : ''}`} />
+      ))}
+      <span class="confidence-label">{confidenceLabel}</span>
+    </div>
+  </div>
+
+  <p class="insight">{insight}</p>
+
+  <div class="recommendation">
+    <p>{recommendation}</p>
+  </div>
+
+  <a class="analysis-cta" href="/">Analyze your conversation →</a>
+</div>
+
+<style>
+  .analysis-card {
+    margin: 36px 0;
+    padding: 22px 24px;
+    background: var(--surface-2);
+    border: 1px solid rgba(167, 139, 250, 0.18);
+    border-radius: 16px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .wordmark {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--primary);
+  }
+
+  .preview-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .signal-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .signal-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(167, 139, 250, 0.12);
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .confidence {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .dot.filled {
+    background: var(--primary);
+  }
+
+  .confidence-label {
+    font-size: 11px;
+    color: var(--dim);
+    margin-left: 4px;
+  }
+
+  .insight {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+    margin: 0 0 14px;
+  }
+
+  .recommendation {
+    border-left: 2px solid var(--primary);
+    padding-left: 14px;
+    margin-bottom: 18px;
+  }
+
+  .recommendation p {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .analysis-cta {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .analysis-cta:hover {
+    text-decoration: underline;
+  }
+</style>
