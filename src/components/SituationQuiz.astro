@@ -13,7 +13,7 @@ const APP_STORE = 'https://apps.apple.com/ro/app/crushcue-ai/id6764087079';
 const totalQ = quiz.questions.length;
 ---
 
-<div class="quiz" id="situation-quiz" data-cluster={clusterKey}>
+<div class="quiz" id="situation-quiz" data-cluster={clusterKey} data-results={JSON.stringify(quiz.results)}>
 
   <!-- Intro -->
   <div class="quiz-step quiz-intro active" data-step="intro">
@@ -56,103 +56,101 @@ const totalQ = quiz.questions.length;
     <a class="quiz-result-cta" href={APP_STORE}>Analyze my actual situation →</a>
   </div>
 
-  <!-- Results data for JS -->
-  <script type="application/json" id="quiz-results-json" set:text={JSON.stringify(quiz.results)} />
 
 </div>
 
 <script>
   const container = document.getElementById('situation-quiz');
-  if (!container) throw new Error('quiz container missing');
 
-  const cluster = container.dataset.cluster ?? 'unknown';
-  const resultsEl = document.getElementById('quiz-results-json');
-  const results: Array<{ key: string; headline: string; body: string }> =
-    resultsEl ? JSON.parse(resultsEl.textContent ?? '[]') : [];
+  if (container) {
+    const cluster = container.dataset.cluster ?? 'unknown';
+    const results: Array<{ key: string; headline: string; body: string }> =
+      JSON.parse(container.dataset.results ?? '[]');
 
-  const scores: Record<string, number> = {};
-  let currentQ = -1; // -1 = intro
+    const scores: Record<string, number> = {};
+    let currentQ = -1;
 
-  function dispatch(name: string, detail: Record<string, unknown>) {
-    window.dispatchEvent(new CustomEvent(`quiz:${name}`, { detail }));
-  }
+    function dispatch(name: string, detail: Record<string, unknown>) {
+      window.dispatchEvent(new CustomEvent(`quiz:${name}`, { detail }));
+    }
 
-  function showStep(step: string | number) {
-    container.querySelectorAll<HTMLElement>('.quiz-step').forEach(el => {
-      el.classList.toggle('active', el.dataset.step === String(step));
+    function showStep(step: string | number) {
+      container.querySelectorAll<HTMLElement>('.quiz-step').forEach(el => {
+        el.classList.toggle('active', el.dataset.step === String(step));
+      });
+    }
+
+    function addWeights(weights: Record<string, number>) {
+      for (const [key, val] of Object.entries(weights)) {
+        scores[key] = (scores[key] ?? 0) + val;
+      }
+    }
+
+    function computeResult() {
+      let best = results[0];
+      let bestScore = -Infinity;
+      for (const r of results) {
+        const s = scores[r.key] ?? 0;
+        if (s > bestScore) { bestScore = s; best = r; }
+      }
+      return best;
+    }
+
+    // Intro → Q0
+    container.querySelector('.quiz-start-btn')?.addEventListener('click', () => {
+      dispatch('start', { cluster });
+      currentQ = 0;
+      showStep(0);
     });
-  }
 
-  function addWeights(weights: Record<string, number>) {
-    for (const [key, val] of Object.entries(weights)) {
-      scores[key] = (scores[key] ?? 0) + val;
-    }
-  }
+    // Answer selection
+    container.querySelectorAll<HTMLElement>('.quiz-question').forEach((qEl, qi) => {
+      const answers = qEl.querySelectorAll<HTMLButtonElement>('.quiz-answer');
+      const nextBtn = qEl.querySelector<HTMLButtonElement>('.quiz-next-btn');
 
-  function computeResult() {
-    let best = results[0];
-    let bestScore = -Infinity;
-    for (const r of results) {
-      const s = scores[r.key] ?? 0;
-      if (s > bestScore) { bestScore = s; best = r; }
-    }
-    return best;
-  }
-
-  // Intro → Q0
-  container.querySelector('.quiz-start-btn')?.addEventListener('click', () => {
-    dispatch('start', { cluster });
-    currentQ = 0;
-    showStep(0);
-  });
-
-  // Answer selection
-  container.querySelectorAll<HTMLElement>('.quiz-question').forEach((qEl, qi) => {
-    const answers = qEl.querySelectorAll<HTMLButtonElement>('.quiz-answer');
-    const nextBtn = qEl.querySelector<HTMLButtonElement>('.quiz-next-btn');
-
-    answers.forEach(btn => {
-      btn.addEventListener('click', () => {
-        answers.forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        nextBtn?.removeAttribute('hidden');
-        dispatch('answer', {
-          cluster,
-          questionIndex: qi,
-          answer: btn.textContent?.trim(),
+      answers.forEach(btn => {
+        btn.addEventListener('click', () => {
+          answers.forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          nextBtn?.removeAttribute('hidden');
+          dispatch('answer', {
+            cluster,
+            questionIndex: qi,
+            answer: btn.textContent?.trim(),
+          });
         });
       });
-    });
 
-    nextBtn?.addEventListener('click', () => {
-      const selected = qEl.querySelector<HTMLButtonElement>('.quiz-answer.selected');
-      if (!selected) return;
-      const weights = JSON.parse(selected.dataset.weights ?? '{}');
-      addWeights(weights);
+      nextBtn?.addEventListener('click', () => {
+        const selected = qEl.querySelector<HTMLButtonElement>('.quiz-answer.selected');
+        if (!selected) return;
+        const weights = JSON.parse(selected.dataset.weights ?? '{}');
+        addWeights(weights);
 
-      const totalQ = container.querySelectorAll('.quiz-question').length;
-      if (qi + 1 < totalQ) {
-        currentQ = qi + 1;
-        showStep(currentQ);
-      } else {
-        const result = computeResult();
-        dispatch('complete', { cluster, result: result.key });
+        const totalQ = container.querySelectorAll('.quiz-question').length;
+        if (qi + 1 < totalQ) {
+          currentQ = qi + 1;
+          showStep(currentQ);
+        } else {
+          const result = computeResult();
+          dispatch('complete', { cluster, result: result.key });
 
-        const resultEl = container.querySelector('.quiz-result');
-        if (resultEl) {
-          resultEl.querySelector('.quiz-result-headline')!.textContent = result.headline;
-          resultEl.querySelector('.quiz-result-body')!.textContent = result.body;
-          const cta = resultEl.querySelector<HTMLAnchorElement>('.quiz-result-cta');
-          if (cta) {
-            cta.addEventListener('click', () => {
-              dispatch('cta', { cluster, result: result.key });
-            }, { once: true });
+          const resultEl = container.querySelector('.quiz-result');
+          if (resultEl) {
+            resultEl.querySelector('.quiz-result-headline')!.textContent = result.headline;
+            resultEl.querySelector('.quiz-result-body')!.textContent = result.body;
+            const cta = resultEl.querySelector<HTMLAnchorElement>('.quiz-result-cta');
+            if (cta) {
+              cta.addEventListener('click', () => {
+                dispatch('cta', { cluster, result: result.key });
+              }, { once: true });
+            }
           }
+          showStep('result');
         }
-        showStep('result');
-      }
+      });
     });
-  });
+  }
 </script>
 
 <style>
