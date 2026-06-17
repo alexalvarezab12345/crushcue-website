@@ -5,33 +5,116 @@ interface Props {
 
 const { clusterKey } = Astro.props;
 
-// Map cluster keys → archetype screenshot paths.
-// All clusters currently use the withdrawal screenshot as a global stopgap.
-// When archetype-specific assets are ready, swap the paths below:
-//   ambiguity:    '/images/screenshots/crushcue-analysis-ambiguity.png'
-//   reconnection: '/images/screenshots/crushcue-analysis-reconnection.png'
-//   texting:      '/images/screenshots/crushcue-analysis-texting.png'
-//   clarity:      '/images/screenshots/crushcue-analysis-clarity.png'
-const WITHDRAWAL = '/images/screenshots/crushcue-analysis-withdrawal.png';
+interface PreviewContent {
+  userBubble: string;
+  signal: string;
+  confidence: 'high' | 'medium' | 'low';
+  means: string;
+  next: string;
+}
 
-const CLUSTER_SCREENSHOTS: Record<string, string> = {
-  ghosting:            WITHDRAWAL,
-  left_on_read:        WITHDRAWAL,
-  story_watching:      WITHDRAWAL,
-  mixed_signals:       WITHDRAWAL, // → ambiguity when ready
-  hot_and_cold:        WITHDRAWAL, // → ambiguity when ready
-  situationship:       WITHDRAWAL, // → ambiguity when ready
-  crush_confusion:     WITHDRAWAL, // → ambiguity when ready
-  ex_reconnection:     WITHDRAWAL, // → reconnection when ready
-  double_texting:      WITHDRAWAL, // → texting when ready
-  dry_texting:         WITHDRAWAL, // → texting when ready
-  first_date_followup: WITHDRAWAL, // → texting when ready
-  what_to_text:        WITHDRAWAL, // → clarity when ready
+const CLUSTER_CONTENT: Record<string, PreviewContent> = {
+  ghosting: {
+    userBubble: "Last seen 3 weeks ago. No reply since.",
+    signal: "Deliberate silence",
+    confidence: "high",
+    means: "They've stepped back intentionally, not forgotten.",
+    next: "Don't follow up. Give it space.",
+  },
+  left_on_read: {
+    userBubble: "Opened it 2 days ago. Still nothing.",
+    signal: "Seen, not replied",
+    confidence: "high",
+    means: "They're choosing not to engage right now.",
+    next: "One more message if needed. Then wait.",
+  },
+  story_watching: {
+    userBubble: "Watches every story. Never texts first.",
+    signal: "Passive interest",
+    confidence: "medium",
+    means: "Keeping tabs without committing.",
+    next: "Post something worth replying to.",
+  },
+  mixed_signals: {
+    userBubble: "Warm one day, completely distant the next.",
+    signal: "Inconsistent engagement",
+    confidence: "medium",
+    means: "Attracted but unsure about going further.",
+    next: "Slow down. Let them set the pace.",
+  },
+  hot_and_cold: {
+    userBubble: "Gets close, then pulls away. Again.",
+    signal: "Avoidant cycle",
+    confidence: "high",
+    means: "Pulls back when emotional stakes rise.",
+    next: "Stop chasing. More space, less effort.",
+  },
+  situationship: {
+    userBubble: "We act like a couple but there's no label.",
+    signal: "Undefined attachment",
+    confidence: "medium",
+    means: "Wants closeness without committing to it.",
+    next: "Name it or create distance. Don't wait.",
+  },
+  crush_confusion: {
+    userBubble: "Super friendly but I can't tell if it's more.",
+    signal: "Ambiguous warmth",
+    confidence: "medium",
+    means: "Genuine interest, not yet crossed into romantic.",
+    next: "Test with a low-stakes move. Watch the response.",
+  },
+  what_to_text: {
+    userBubble: "I have no idea what to say next.",
+    signal: "Re-engagement window",
+    confidence: "high",
+    means: "The opening is there. Overthinking closes it.",
+    next: "Short, warm, no pressure. One line is enough.",
+  },
+  double_texting: {
+    userBubble: "Already texted twice with no reply.",
+    signal: "Unanswered follow-up",
+    confidence: "high",
+    means: "More messages won't change anything right now.",
+    next: "Stop. Wait for them to respond.",
+  },
+  dry_texting: {
+    userBubble: "'K.' 'Lol.' 'Yeah.' Every single reply.",
+    signal: "Engagement drop",
+    confidence: "high",
+    means: "Effort is falling. Something shifted.",
+    next: "Match their energy. Stop over-investing.",
+  },
+  first_date_followup: {
+    userBubble: "Great date. No text the next day.",
+    signal: "Post-date silence",
+    confidence: "medium",
+    means: "Playing it cool — or genuinely processing.",
+    next: "One warm message. Then let them come to you.",
+  },
+  ex_reconnection: {
+    userBubble: "Ex texted out of nowhere after months.",
+    signal: "Re-engagement attempt",
+    confidence: "medium",
+    means: "Testing if the door is still open.",
+    next: "Respond slowly. Don't over-invest yet.",
+  },
 };
 
-const resolved = clusterKey ? (CLUSTER_SCREENSHOTS[clusterKey] ?? WITHDRAWAL) : WITHDRAWAL;
-// CSS mock renders only if resolved is explicitly ''.
-const SCREENSHOT_SRC = resolved;
+const DEFAULT_CONTENT: PreviewContent = {
+  userBubble: "They were consistent for weeks, then went quiet.",
+  signal: "Withdrawal pattern",
+  confidence: "high",
+  means: "Pattern break after things got closer.",
+  next: "Wait 5–7 days before reaching out.",
+};
+
+const c = (clusterKey && CLUSTER_CONTENT[clusterKey]) ? CLUSTER_CONTENT[clusterKey] : DEFAULT_CONTENT;
+
+const confidenceDots = {
+  high:   [true,  true,  true],
+  medium: [true,  true,  false],
+  low:    [true,  false, false],
+}[c.confidence];
 
 const APP_STORE = 'https://apps.apple.com/ro/app/crushcue-ai/id6764087079';
 ---
@@ -39,63 +122,97 @@ const APP_STORE = 'https://apps.apple.com/ro/app/crushcue-ai/id6764087079';
 <div class="screenshot-section">
   <div class="screenshot-layout">
 
-    <div class="phone-frame" aria-hidden="true">
+    <!-- Phone -->
+    <div class="phone-wrap" aria-hidden="true">
       <div class="phone-shell">
-        <div class="phone-notch"></div>
-        <div class="phone-screen">
 
-          {SCREENSHOT_SRC
-            ? <img src={SCREENSHOT_SRC} alt="CrushCue analysis result" class="screenshot-img" />
-            : (
-              <div class="mock-ui">
-                <div class="mock-header">
-                  <span class="mock-back">‹</span>
-                  <span class="mock-title">CrushCue</span>
-                  <span class="mock-dots">···</span>
-                </div>
-                <div class="mock-body">
-                  <p class="mock-label">Situation Analysis</p>
-                  <div class="mock-signal-row">
-                    <span class="mock-signal-pill">Avoidance pattern</span>
-                    <div class="mock-dots-row">
-                      <span class="mock-dot filled"></span>
-                      <span class="mock-dot filled"></span>
-                      <span class="mock-dot filled"></span>
-                    </div>
-                  </div>
-                  <div class="mock-divider"></div>
-                  <p class="mock-section-label">What's happening</p>
-                  <p class="mock-insight">
-                    They engaged consistently for 12 days, then went quiet.
-                    The pattern break aligns with increased closeness —
-                    this is avoidance, not disinterest.
-                  </p>
-                  <div class="mock-rec-block">
-                    <p class="mock-rec">
-                      Wait 5–7 days. One short message if you want closure.
-                      No reply after that is your answer.
-                    </p>
-                  </div>
+        <!-- Status bar -->
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <rect x="0" y="3" width="2" height="5" rx="0.5" fill="rgba(255,255,255,0.5)"/>
+              <rect x="2.5" y="2" width="2" height="6" rx="0.5" fill="rgba(255,255,255,0.65)"/>
+              <rect x="5" y="1" width="2" height="7" rx="0.5" fill="rgba(255,255,255,0.8)"/>
+              <rect x="7.5" y="0" width="2" height="8" rx="0.5" fill="white"/>
+            </svg>
+            <svg width="16" height="8" viewBox="0 0 16 8" fill="none">
+              <rect x="0.5" y="0.5" width="13" height="7" rx="1.5" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+              <rect x="1.5" y="1.5" width="9" height="5" rx="0.5" fill="white"/>
+              <rect x="14" y="2.5" width="1.5" height="3" rx="0.5" fill="rgba(255,255,255,0.35)"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- App header -->
+        <div class="app-header">
+          <div class="app-header-left">
+            <div class="app-icon"></div>
+            <div>
+              <p class="app-name">CrushCue</p>
+              <p class="app-status">Ready when you are</p>
+            </div>
+          </div>
+          <div class="app-header-right">
+            <span class="app-action">Vibe</span>
+            <span class="app-refresh">↻</span>
+          </div>
+        </div>
+
+        <!-- Chat area -->
+        <div class="chat-area">
+
+          <!-- User message bubble -->
+          <div class="bubble-row user-row">
+            <div class="bubble user-bubble">{c.userBubble}</div>
+          </div>
+
+          <!-- CrushCue analysis response -->
+          <div class="bubble-row crushcue-row">
+            <div class="crushcue-avatar">
+              <span>C</span>
+            </div>
+            <div class="analysis-card">
+              <div class="analysis-top">
+                <span class="signal-pill">{c.signal}</span>
+                <div class="conf-dots">
+                  {confidenceDots.map(filled => (
+                    <span class:list={['conf-dot', { filled }]}></span>
+                  ))}
                 </div>
               </div>
-            )
-          }
+              <div class="analysis-divider"></div>
+              <p class="analysis-label">What it means</p>
+              <p class="analysis-means">{c.means}</p>
+              <div class="analysis-rec">
+                <p class="analysis-next">{c.next}</p>
+              </div>
+            </div>
+          </div>
 
         </div>
+
+        <!-- Input bar -->
+        <div class="input-bar">
+          <div class="input-placeholder">Paste the chat...</div>
+          <div class="input-send">↑</div>
+        </div>
+
       </div>
     </div>
 
+    <!-- Copy -->
     <div class="screenshot-copy">
       <p class="copy-eyebrow">What you get</p>
       <p class="copy-headline">A specific read, not more advice</p>
       <p class="copy-body">
-        CrushCue reads the conversation pattern — timing, language,
-        engagement arc — and tells you what's actually happening.
-        Not what you want to hear. What the signals say.
+        Paste the conversation. CrushCue reads the pattern —
+        timing, language, engagement arc — and tells you
+        what's actually happening.
       </p>
       <ul class="copy-features">
-        <li>Signal type and strength</li>
-        <li>What it means for your situation</li>
+        <li>What the behavior actually means</li>
+        <li>Whether you're overthinking it</li>
         <li>Exactly what to do next</li>
       </ul>
       <a class="copy-cta" href={APP_STORE}>Get your read →</a>
@@ -111,140 +228,285 @@ const APP_STORE = 'https://apps.apple.com/ro/app/crushcue-ai/id6764087079';
 
   .screenshot-layout {
     display: grid;
-    grid-template-columns: 180px 1fr;
+    grid-template-columns: 220px 1fr;
     gap: 32px;
     align-items: center;
   }
 
-  /* ── Phone frame ── */
+  /* ─── Phone shell ─── */
+  .phone-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
   .phone-shell {
-    width: 160px;
-    background: #1a1a24;
-    border: 2px solid rgba(255,255,255,0.12);
-    border-radius: 28px;
-    padding: 12px 8px;
-    box-shadow:
-      0 0 0 1px rgba(0,0,0,0.4),
-      0 20px 50px rgba(0,0,0,0.5);
-    position: relative;
-  }
-
-  .phone-notch {
-    width: 48px;
-    height: 6px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 999px;
-    margin: 0 auto 10px;
-  }
-
-  .phone-screen {
-    border-radius: 18px;
+    width: 200px;
+    background: #0f0f17;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 32px;
     overflow: hidden;
-    background: #0f0f14;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.5),
+      0 24px 60px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
   }
 
-  .screenshot-img {
-    width: 100%;
-    display: block;
-  }
-
-  /* ── CSS mock UI ── */
-  .mock-ui {
-    padding: 0;
-    font-size: 9px;
-  }
-
-  .mock-header {
+  /* ─── Status bar ─── */
+  .status-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 10px 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    background: rgba(23,23,31,0.9);
+    padding: 8px 14px 4px;
+    background: #12121a;
   }
 
-  .mock-back { color: #a78bfa; font-size: 14px; }
-  .mock-title { font-size: 9.5px; font-weight: 700; color: #f7f3ff; letter-spacing: -0.01em; }
-  .mock-dots { color: #8f89a3; letter-spacing: 1px; }
-
-  .mock-body {
-    padding: 10px;
-  }
-
-  .mock-label {
-    font-size: 8px;
+  .status-time {
+    font-size: 9px;
     font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #8f89a3;
-    margin: 0 0 6px;
+    color: #fff;
+    letter-spacing: -0.01em;
   }
 
-  .mock-signal-row {
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ─── App header ─── */
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px 8px;
+    background: #12121a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .app-header-left {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
   }
 
-  .mock-signal-pill {
-    background: rgba(167,139,250,0.15);
-    border: 1px solid rgba(167,139,250,0.3);
+  .app-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    flex-shrink: 0;
+  }
+
+  .app-name {
+    font-size: 10px;
+    font-weight: 700;
+    color: #f0eaff;
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .app-status {
+    font-size: 7.5px;
+    color: #6adb8a;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .app-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .app-action {
+    font-size: 8px;
+    font-weight: 700;
     color: #a78bfa;
+    background: rgba(167, 139, 250, 0.12);
+    border: 1px solid rgba(167, 139, 250, 0.25);
     border-radius: 999px;
     padding: 2px 6px;
-    font-size: 7.5px;
-    font-weight: 700;
   }
 
-  .mock-dots-row { display: flex; gap: 2px; }
+  .app-refresh {
+    font-size: 11px;
+    color: #6b6480;
+  }
 
-  .mock-dot {
+  /* ─── Chat area ─── */
+  .chat-area {
+    flex: 1;
+    padding: 10px 10px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #0f0f17;
+  }
+
+  .bubble-row {
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+  }
+
+  .user-row {
+    justify-content: flex-end;
+  }
+
+  .crushcue-row {
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .bubble {
+    max-width: 80%;
+    padding: 7px 10px;
+    border-radius: 14px;
+    font-size: 9.5px;
+    line-height: 1.45;
+  }
+
+  .user-bubble {
+    background: linear-gradient(135deg, #7c3aed, #9d6cf0);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+
+  .crushcue-avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .crushcue-avatar span {
+    font-size: 8px;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  /* ─── Analysis card (CrushCue response) ─── */
+  .analysis-card {
+    background: #1a1a27;
+    border: 1px solid rgba(167, 139, 250, 0.18);
+    border-radius: 12px;
+    border-bottom-left-radius: 4px;
+    padding: 8px 10px;
+    max-width: calc(100% - 24px);
+  }
+
+  .analysis-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+  }
+
+  .signal-pill {
+    font-size: 8px;
+    font-weight: 700;
+    color: #a78bfa;
+    background: rgba(167, 139, 250, 0.14);
+    border: 1px solid rgba(167, 139, 250, 0.28);
+    border-radius: 999px;
+    padding: 2px 6px;
+    white-space: nowrap;
+  }
+
+  .conf-dots {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+
+  .conf-dot {
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.15);
   }
 
-  .mock-dot.filled { background: #a78bfa; }
+  .conf-dot.filled {
+    background: #a78bfa;
+  }
 
-  .mock-divider {
+  .analysis-divider {
     height: 1px;
-    background: rgba(255,255,255,0.06);
-    margin: 8px 0;
+    background: rgba(255, 255, 255, 0.06);
+    margin: 6px 0;
   }
 
-  .mock-section-label {
+  .analysis-label {
     font-size: 7.5px;
     font-weight: 700;
-    color: #8f89a3;
-    letter-spacing: 0.04em;
     text-transform: uppercase;
-    margin: 0 0 4px;
+    letter-spacing: 0.05em;
+    color: #6b6480;
+    margin: 0 0 3px;
   }
 
-  .mock-insight {
-    font-size: 8px;
+  .analysis-means {
+    font-size: 9px;
     color: #b8b2ca;
     line-height: 1.45;
-    margin: 0 0 8px;
+    margin: 0 0 7px;
   }
 
-  .mock-rec-block {
+  .analysis-rec {
     border-left: 2px solid #a78bfa;
     padding-left: 6px;
   }
 
-  .mock-rec {
-    font-size: 8px;
-    color: #f7f3ff;
-    line-height: 1.45;
+  .analysis-next {
+    font-size: 9px;
+    font-weight: 600;
+    color: #f0eaff;
+    line-height: 1.4;
     margin: 0;
-    font-weight: 500;
   }
 
-  /* ── Copy section ── */
+  /* ─── Input bar ─── */
+  .input-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px 10px;
+    background: #12121a;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .input-placeholder {
+    flex: 1;
+    font-size: 8.5px;
+    color: #4a4460;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+
+  .input-send {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: #fff;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ─── Right-side copy ─── */
   .copy-eyebrow {
     font-size: 11px;
     font-weight: 700;
@@ -276,14 +538,15 @@ const APP_STORE = 'https://apps.apple.com/ro/app/crushcue-ai/id6764087079';
     margin: 0 0 18px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
   }
 
   .copy-features li {
     font-size: 12.5px;
     color: var(--muted);
-    padding-left: 14px;
+    padding-left: 16px;
     position: relative;
+    line-height: 1.4;
   }
 
   .copy-features li::before {
@@ -302,17 +565,22 @@ const APP_STORE = 'https://apps.apple.com/ro/app/crushcue-ai/id6764087079';
     text-decoration: none;
   }
 
-  .copy-cta:hover { text-decoration: underline; }
+  .copy-cta:hover {
+    text-decoration: underline;
+  }
 
-  /* ── Mobile: stack vertically ── */
-  @media (max-width: 580px) {
+  /* ─── Mobile ─── */
+  @media (max-width: 600px) {
     .screenshot-layout {
       grid-template-columns: 1fr;
     }
 
-    .phone-frame {
-      display: flex;
+    .phone-wrap {
       justify-content: center;
+    }
+
+    .phone-shell {
+      width: min(200px, 70vw);
     }
   }
 </style>
