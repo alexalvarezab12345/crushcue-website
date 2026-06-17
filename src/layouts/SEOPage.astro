@@ -17,6 +17,7 @@ interface Props {
   noindex?: boolean;
   publishedDate?: string;
   ctaPrelude?: string;
+  clusterKey?: string;
   conversationExample?: Array<{ sender: 'you' | 'them'; text: string }>;
   analysisCard?: { signal: string; confidence: 'high' | 'medium' | 'low'; insight: string; recommendation: string };
   scenarioCards?: Array<{ label: string; description: string }>;
@@ -30,6 +31,7 @@ const {
   noindex = false,
   publishedDate,
   ctaPrelude,
+  clusterKey,
   conversationExample,
   analysisCard,
   scenarioCards,
@@ -82,7 +84,7 @@ if (relatedSlugs?.length) {
         />
       )}
 
-      <AppScreenshotSection />
+      <AppScreenshotSection clusterKey={clusterKey} />
 
       <HowItWorks />
 

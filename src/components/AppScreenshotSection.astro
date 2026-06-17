@@ -1,10 +1,37 @@
 ---
-// ─────────────────────────────────────────────────────────────
-// SWAP POINT: set SCREENSHOT_SRC to a real image path when ready.
-// e.g.  '/images/crushcue-analysis-screen.png'
-// Leave empty ('') to render the CSS mock UI placeholder.
-// ─────────────────────────────────────────────────────────────
-const SCREENSHOT_SRC = '';
+interface Props {
+  clusterKey?: string;
+}
+
+const { clusterKey } = Astro.props;
+
+// Map cluster keys → archetype screenshot paths.
+// All clusters currently use the withdrawal screenshot as a global stopgap.
+// When archetype-specific assets are ready, swap the paths below:
+//   ambiguity:    '/images/screenshots/crushcue-analysis-ambiguity.png'
+//   reconnection: '/images/screenshots/crushcue-analysis-reconnection.png'
+//   texting:      '/images/screenshots/crushcue-analysis-texting.png'
+//   clarity:      '/images/screenshots/crushcue-analysis-clarity.png'
+const WITHDRAWAL = '/images/screenshots/crushcue-analysis-withdrawal.png';
+
+const CLUSTER_SCREENSHOTS: Record<string, string> = {
+  ghosting:            WITHDRAWAL,
+  left_on_read:        WITHDRAWAL,
+  story_watching:      WITHDRAWAL,
+  mixed_signals:       WITHDRAWAL, // → ambiguity when ready
+  hot_and_cold:        WITHDRAWAL, // → ambiguity when ready
+  situationship:       WITHDRAWAL, // → ambiguity when ready
+  crush_confusion:     WITHDRAWAL, // → ambiguity when ready
+  ex_reconnection:     WITHDRAWAL, // → reconnection when ready
+  double_texting:      WITHDRAWAL, // → texting when ready
+  dry_texting:         WITHDRAWAL, // → texting when ready
+  first_date_followup: WITHDRAWAL, // → texting when ready
+  what_to_text:        WITHDRAWAL, // → clarity when ready
+};
+
+const resolved = clusterKey ? (CLUSTER_SCREENSHOTS[clusterKey] ?? WITHDRAWAL) : WITHDRAWAL;
+// CSS mock renders only if resolved is explicitly ''.
+const SCREENSHOT_SRC = resolved;
 
 const APP_STORE = 'https://apps.apple.com/ro/app/crushcue-ai/id6764087079';
 ---
