@@ -1,0 +1,25 @@
+---
+import { getCollection, render } from 'astro:content';
+import SEOPage from '../layouts/SEOPage.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('seo');
+  return pages.map(entry => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, metaTitle, metaDescription, status, ctaPrelude } = entry.data;
+const noindex = status !== 'published';
+---
+<SEOPage
+  title={metaTitle ?? title}
+  description={metaDescription}
+  noindex={noindex}
+  ctaPrelude={ctaPrelude}
+>
+  <Content />
+</SEOPage>

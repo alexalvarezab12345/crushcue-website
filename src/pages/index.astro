@@ -1,0 +1,121 @@
+---
+import Base from '../layouts/Base.astro';
+
+const description = "CrushCue helps you craft better messages, respond naturally, and feel more confident in conversations — powered by AI.";
+---
+<Base
+  title="CrushCue"
+  description={description}
+  ogTitle="CrushCue — AI texting assistant for dating"
+>
+  <div class="page">
+    <div class="container">
+
+      <h1>CrushCue</h1>
+
+      <p class="tagline">
+        Your AI texting assistant for dating, conversations, and real-life replies.
+      </p>
+
+      <div class="card">
+        <p>
+          CrushCue helps you craft better messages, respond naturally, and feel more confident
+          in conversations — powered by AI.
+        </p>
+      </div>
+
+      <div class="links">
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+      </div>
+
+      <div class="footer">
+        © 2026 CrushCue • contact@crushcue.app
+      </div>
+
+    </div>
+  </div>
+</Base>
+
+<style>
+  .page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 700px;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 42px;
+    margin-bottom: 12px;
+    letter-spacing: -0.04em;
+  }
+
+  .tagline {
+    font-size: 18px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .card {
+    background: rgba(23, 23, 31, 0.9);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(14px);
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .links {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .links a {
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+    transition: 0.2s;
+  }
+
+  .links a:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+  }
+
+  .footer {
+    margin-top: 30px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 600px) {
+    h1 {
+      font-size: 32px;
+    }
+
+    .tagline {
+      font-size: 16px;
+    }
+  }
+</style>

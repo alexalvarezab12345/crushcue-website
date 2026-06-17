@@ -1,0 +1,69 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  noindex?: boolean;
+  ogTitle?: string;
+  ogDescription?: string;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  noindex = false,
+  ogTitle,
+  ogDescription,
+} = Astro.props;
+
+const resolvedCanonical = canonical ?? new URL(Astro.url.pathname, Astro.site).toString();
+const resolvedOgTitle = ogTitle ?? title;
+const resolvedOgDescription = ogDescription ?? description;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  {description && <meta name="description" content={description} />}
+  <link rel="canonical" href={resolvedCanonical} />
+  {noindex && <meta name="robots" content="noindex" />}
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={resolvedCanonical} />
+  <meta property="og:title" content={resolvedOgTitle} />
+  {resolvedOgDescription && <meta property="og:description" content={resolvedOgDescription} />}
+</head>
+<body>
+  <slot />
+</body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #0f0f14;
+    --surface: #17171f;
+    --surface-2: #20202a;
+    --text: #f7f3ff;
+    --muted: #b8b2ca;
+    --dim: #8f89a3;
+    --primary: #a78bfa;
+    --border: rgba(255, 255, 255, 0.08);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(124, 58, 237, 0.24), transparent 34%),
+      radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.12), transparent 30%),
+      var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+</style>
