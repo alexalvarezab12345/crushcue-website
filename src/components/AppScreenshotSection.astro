@@ -1,0 +1,291 @@
+---
+// ─────────────────────────────────────────────────────────────
+// SWAP POINT: set SCREENSHOT_SRC to a real image path when ready.
+// e.g.  '/images/crushcue-analysis-screen.png'
+// Leave empty ('') to render the CSS mock UI placeholder.
+// ─────────────────────────────────────────────────────────────
+const SCREENSHOT_SRC = '';
+
+const APP_STORE = 'https://apps.apple.com/ro/app/crushcue-ai/id6764087079';
+---
+
+<div class="screenshot-section">
+  <div class="screenshot-layout">
+
+    <div class="phone-frame" aria-hidden="true">
+      <div class="phone-shell">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+
+          {SCREENSHOT_SRC
+            ? <img src={SCREENSHOT_SRC} alt="CrushCue analysis result" class="screenshot-img" />
+            : (
+              <div class="mock-ui">
+                <div class="mock-header">
+                  <span class="mock-back">‹</span>
+                  <span class="mock-title">CrushCue</span>
+                  <span class="mock-dots">···</span>
+                </div>
+                <div class="mock-body">
+                  <p class="mock-label">Situation Analysis</p>
+                  <div class="mock-signal-row">
+                    <span class="mock-signal-pill">Avoidance pattern</span>
+                    <div class="mock-dots-row">
+                      <span class="mock-dot filled"></span>
+                      <span class="mock-dot filled"></span>
+                      <span class="mock-dot filled"></span>
+                    </div>
+                  </div>
+                  <div class="mock-divider"></div>
+                  <p class="mock-section-label">What's happening</p>
+                  <p class="mock-insight">
+                    They engaged consistently for 12 days, then went quiet.
+                    The pattern break aligns with increased closeness —
+                    this is avoidance, not disinterest.
+                  </p>
+                  <div class="mock-rec-block">
+                    <p class="mock-rec">
+                      Wait 5–7 days. One short message if you want closure.
+                      No reply after that is your answer.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+
+        </div>
+      </div>
+    </div>
+
+    <div class="screenshot-copy">
+      <p class="copy-eyebrow">What you get</p>
+      <p class="copy-headline">A specific read, not more advice</p>
+      <p class="copy-body">
+        CrushCue reads the conversation pattern — timing, language,
+        engagement arc — and tells you what's actually happening.
+        Not what you want to hear. What the signals say.
+      </p>
+      <ul class="copy-features">
+        <li>Signal type and strength</li>
+        <li>What it means for your situation</li>
+        <li>Exactly what to do next</li>
+      </ul>
+      <a class="copy-cta" href={APP_STORE}>Get your read →</a>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .screenshot-section {
+    margin: 36px 0;
+  }
+
+  .screenshot-layout {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+
+  /* ── Phone frame ── */
+  .phone-shell {
+    width: 160px;
+    background: #1a1a24;
+    border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 28px;
+    padding: 12px 8px;
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,0.4),
+      0 20px 50px rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .phone-notch {
+    width: 48px;
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 999px;
+    margin: 0 auto 10px;
+  }
+
+  .phone-screen {
+    border-radius: 18px;
+    overflow: hidden;
+    background: #0f0f14;
+  }
+
+  .screenshot-img {
+    width: 100%;
+    display: block;
+  }
+
+  /* ── CSS mock UI ── */
+  .mock-ui {
+    padding: 0;
+    font-size: 9px;
+  }
+
+  .mock-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: rgba(23,23,31,0.9);
+  }
+
+  .mock-back { color: #a78bfa; font-size: 14px; }
+  .mock-title { font-size: 9.5px; font-weight: 700; color: #f7f3ff; letter-spacing: -0.01em; }
+  .mock-dots { color: #8f89a3; letter-spacing: 1px; }
+
+  .mock-body {
+    padding: 10px;
+  }
+
+  .mock-label {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8f89a3;
+    margin: 0 0 6px;
+  }
+
+  .mock-signal-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .mock-signal-pill {
+    background: rgba(167,139,250,0.15);
+    border: 1px solid rgba(167,139,250,0.3);
+    color: #a78bfa;
+    border-radius: 999px;
+    padding: 2px 6px;
+    font-size: 7.5px;
+    font-weight: 700;
+  }
+
+  .mock-dots-row { display: flex; gap: 2px; }
+
+  .mock-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .mock-dot.filled { background: #a78bfa; }
+
+  .mock-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 8px 0;
+  }
+
+  .mock-section-label {
+    font-size: 7.5px;
+    font-weight: 700;
+    color: #8f89a3;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+  }
+
+  .mock-insight {
+    font-size: 8px;
+    color: #b8b2ca;
+    line-height: 1.45;
+    margin: 0 0 8px;
+  }
+
+  .mock-rec-block {
+    border-left: 2px solid #a78bfa;
+    padding-left: 6px;
+  }
+
+  .mock-rec {
+    font-size: 8px;
+    color: #f7f3ff;
+    line-height: 1.45;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  /* ── Copy section ── */
+  .copy-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin: 0 0 6px;
+  }
+
+  .copy-headline {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    line-height: 1.25;
+    margin: 0 0 10px;
+  }
+
+  .copy-body {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.65;
+    margin: 0 0 14px;
+  }
+
+  .copy-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .copy-features li {
+    font-size: 12.5px;
+    color: var(--muted);
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .copy-features li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .copy-cta {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .copy-cta:hover { text-decoration: underline; }
+
+  /* ── Mobile: stack vertically ── */
+  @media (max-width: 580px) {
+    .screenshot-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .phone-frame {
+      display: flex;
+      justify-content: center;
+    }
+  }
+</style>

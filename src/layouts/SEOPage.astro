@@ -1,10 +1,14 @@
 ---
 import Base from './Base.astro';
 import ConversationBubbles from '../components/ConversationBubbles.astro';
+import InlineHook from '../components/InlineHook.astro';
 import AnalysisCard from '../components/AnalysisCard.astro';
 import ScenarioCards from '../components/ScenarioCards.astro';
+import AppScreenshotSection from '../components/AppScreenshotSection.astro';
+import HowItWorks from '../components/HowItWorks.astro';
 import StickyMobileCTA from '../components/StickyMobileCTA.astro';
 import RelatedSituations from '../components/RelatedSituations.astro';
+import ScrollTriggeredCTA from '../components/ScrollTriggeredCTA.astro';
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -59,6 +63,8 @@ if (relatedSlugs?.length) {
         <ConversationBubbles turns={conversationExample} />
       )}
 
+      <InlineHook />
+
       <div class="prose">
         <slot />
       </div>
@@ -75,6 +81,10 @@ if (relatedSlugs?.length) {
           recommendation={analysisCard.recommendation}
         />
       )}
+
+      <AppScreenshotSection />
+
+      <HowItWorks />
 
       {socialProofNote && (
         <p class="social-proof">{socialProofNote}</p>
@@ -99,6 +109,8 @@ if (relatedSlugs?.length) {
       {relatedEntries.length > 0 && (
         <RelatedSituations entries={relatedEntries} />
       )}
+
+      <ScrollTriggeredCTA />
 
       <div class="footer-links">
         <a href="/privacy">Privacy Policy</a>

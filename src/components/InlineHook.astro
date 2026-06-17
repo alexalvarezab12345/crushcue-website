@@ -1,0 +1,40 @@
+---
+const APP_STORE = 'https://apps.apple.com/ro/app/crushcue-ai/id6764087079';
+---
+
+<div class="inline-hook">
+  <span class="hook-text">CrushCue reads this pattern in under 60 seconds.</span>
+  <a class="hook-link" href={APP_STORE}>Analyze my situation →</a>
+</div>
+
+<style>
+  .inline-hook {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 11px 14px 11px 16px;
+    margin: 0 0 28px;
+    background: rgba(167, 139, 250, 0.05);
+    border-left: 2px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .hook-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .hook-link {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .hook-link:hover {
+    text-decoration: underline;
+  }
+</style>
