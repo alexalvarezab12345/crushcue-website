@@ -30,10 +30,16 @@ const resolvedOgDescription = ogDescription ?? description;
   {description && <meta name="description" content={description} />}
   <link rel="canonical" href={resolvedCanonical} />
   {noindex && <meta name="robots" content="noindex" />}
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" href="/favicon.svg" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content={resolvedCanonical} />
   <meta property="og:title" content={resolvedOgTitle} />
   {resolvedOgDescription && <meta property="og:description" content={resolvedOgDescription} />}
+  <meta name="theme-color" content="#7c3aed" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..900&display=swap" rel="stylesheet" />
 </head>
 <body>
   <slot />
@@ -58,7 +64,7 @@ const resolvedOgDescription = ogDescription ?? description;
 
   body {
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Inter', Arial, Helvetica, sans-serif;
     background:
       radial-gradient(circle at top left, rgba(124, 58, 237, 0.24), transparent 34%),
       radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.12), transparent 30%),
