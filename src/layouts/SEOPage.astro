@@ -6,6 +6,7 @@ import AnalysisCard from '../components/AnalysisCard.astro';
 import ScenarioCards from '../components/ScenarioCards.astro';
 import AppScreenshotSection from '../components/AppScreenshotSection.astro';
 import HowItWorks from '../components/HowItWorks.astro';
+import SituationQuiz from '../components/SituationQuiz.astro';
 import StickyMobileCTA from '../components/StickyMobileCTA.astro';
 import RelatedSituations from '../components/RelatedSituations.astro';
 import ScrollTriggeredCTA from '../components/ScrollTriggeredCTA.astro';
@@ -87,6 +88,8 @@ if (relatedSlugs?.length) {
       <AppScreenshotSection clusterKey={clusterKey} />
 
       <HowItWorks />
+
+      <SituationQuiz clusterKey={clusterKey} />
 
       {socialProofNote && (
         <p class="social-proof">{socialProofNote}</p>

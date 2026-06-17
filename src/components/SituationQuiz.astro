@@ -1,0 +1,369 @@
+---
+import { QUIZ_DATA } from '../data/quiz';
+
+interface Props {
+  clusterKey?: string;
+}
+
+const { clusterKey } = Astro.props;
+const quiz = clusterKey ? QUIZ_DATA[clusterKey] : undefined;
+if (!quiz) return;
+
+const APP_STORE = 'https://apps.apple.com/ro/app/crushcue-ai/id6764087079';
+const totalQ = quiz.questions.length;
+---
+
+<div class="quiz" id="situation-quiz" data-cluster={clusterKey}>
+
+  <!-- Intro -->
+  <div class="quiz-step quiz-intro active" data-step="intro">
+    <p class="quiz-eyebrow">Quick diagnostic</p>
+    <p class="quiz-prompt">Which of these best describes your situation?</p>
+    <button class="quiz-start-btn">Figure out what's happening →</button>
+  </div>
+
+  <!-- Questions -->
+  {quiz.questions.map((q, qi) => (
+    <div class="quiz-step quiz-question" data-step={qi}>
+      <div class="quiz-progress">
+        {quiz.questions.map((_, i) => (
+          <span class:list={['quiz-dot', { active: i === qi }]}></span>
+        ))}
+      </div>
+      <p class="quiz-qnum">{qi + 1} of {totalQ}</p>
+      <p class="quiz-qtext">{q.text}</p>
+      <div class="quiz-answers">
+        {q.answers.map(a => (
+          <button
+            class="quiz-answer"
+            data-weights={JSON.stringify(a.weights)}
+          >
+            {a.label}
+          </button>
+        ))}
+      </div>
+      <button class="quiz-next-btn" hidden>
+        {qi < totalQ - 1 ? 'Next →' : 'See my read →'}
+      </button>
+    </div>
+  ))}
+
+  <!-- Result (filled by JS) -->
+  <div class="quiz-step quiz-result" data-step="result">
+    <p class="quiz-result-eyebrow">Your read</p>
+    <p class="quiz-result-headline"></p>
+    <p class="quiz-result-body"></p>
+    <a class="quiz-result-cta" href={APP_STORE}>Analyze my actual situation →</a>
+  </div>
+
+  <!-- Results data for JS -->
+  <script type="application/json" id="quiz-results-json" set:text={JSON.stringify(quiz.results)} />
+
+</div>
+
+<script>
+  const container = document.getElementById('situation-quiz');
+  if (!container) throw new Error('quiz container missing');
+
+  const cluster = container.dataset.cluster ?? 'unknown';
+  const resultsEl = document.getElementById('quiz-results-json');
+  const results: Array<{ key: string; headline: string; body: string }> =
+    resultsEl ? JSON.parse(resultsEl.textContent ?? '[]') : [];
+
+  const scores: Record<string, number> = {};
+  let currentQ = -1; // -1 = intro
+
+  function dispatch(name: string, detail: Record<string, unknown>) {
+    window.dispatchEvent(new CustomEvent(`quiz:${name}`, { detail }));
+  }
+
+  function showStep(step: string | number) {
+    container.querySelectorAll<HTMLElement>('.quiz-step').forEach(el => {
+      el.classList.toggle('active', el.dataset.step === String(step));
+    });
+  }
+
+  function addWeights(weights: Record<string, number>) {
+    for (const [key, val] of Object.entries(weights)) {
+      scores[key] = (scores[key] ?? 0) + val;
+    }
+  }
+
+  function computeResult() {
+    let best = results[0];
+    let bestScore = -Infinity;
+    for (const r of results) {
+      const s = scores[r.key] ?? 0;
+      if (s > bestScore) { bestScore = s; best = r; }
+    }
+    return best;
+  }
+
+  // Intro → Q0
+  container.querySelector('.quiz-start-btn')?.addEventListener('click', () => {
+    dispatch('start', { cluster });
+    currentQ = 0;
+    showStep(0);
+  });
+
+  // Answer selection
+  container.querySelectorAll<HTMLElement>('.quiz-question').forEach((qEl, qi) => {
+    const answers = qEl.querySelectorAll<HTMLButtonElement>('.quiz-answer');
+    const nextBtn = qEl.querySelector<HTMLButtonElement>('.quiz-next-btn');
+
+    answers.forEach(btn => {
+      btn.addEventListener('click', () => {
+        answers.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        nextBtn?.removeAttribute('hidden');
+        dispatch('answer', {
+          cluster,
+          questionIndex: qi,
+          answer: btn.textContent?.trim(),
+        });
+      });
+    });
+
+    nextBtn?.addEventListener('click', () => {
+      const selected = qEl.querySelector<HTMLButtonElement>('.quiz-answer.selected');
+      if (!selected) return;
+      const weights = JSON.parse(selected.dataset.weights ?? '{}');
+      addWeights(weights);
+
+      const totalQ = container.querySelectorAll('.quiz-question').length;
+      if (qi + 1 < totalQ) {
+        currentQ = qi + 1;
+        showStep(currentQ);
+      } else {
+        const result = computeResult();
+        dispatch('complete', { cluster, result: result.key });
+
+        const resultEl = container.querySelector('.quiz-result');
+        if (resultEl) {
+          resultEl.querySelector('.quiz-result-headline')!.textContent = result.headline;
+          resultEl.querySelector('.quiz-result-body')!.textContent = result.body;
+          const cta = resultEl.querySelector<HTMLAnchorElement>('.quiz-result-cta');
+          if (cta) {
+            cta.addEventListener('click', () => {
+              dispatch('cta', { cluster, result: result.key });
+            }, { once: true });
+          }
+        }
+        showStep('result');
+      }
+    });
+  });
+</script>
+
+<style>
+  .quiz {
+    margin: 32px 0;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  /* ── Step visibility ── */
+  .quiz-step {
+    display: none;
+    padding: 22px 24px;
+  }
+
+  .quiz-step.active {
+    display: block;
+    animation: quiz-in 0.22s ease;
+  }
+
+  @keyframes quiz-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Intro ── */
+  .quiz-intro {
+    background: rgba(167, 139, 250, 0.04);
+  }
+
+  .quiz-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin: 0 0 8px;
+  }
+
+  .quiz-prompt {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .quiz-start-btn {
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.28);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  .quiz-start-btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+
+  /* ── Question ── */
+  .quiz-question {
+    background: var(--surface-2);
+  }
+
+  .quiz-progress {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .quiz-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(167, 139, 250, 0.25);
+    transition: background 0.2s;
+  }
+
+  .quiz-dot.active {
+    background: var(--primary);
+  }
+
+  .quiz-qnum {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 6px;
+  }
+
+  .quiz-qtext {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .quiz-answers {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+
+  .quiz-answer {
+    width: 100%;
+    text-align: left;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    line-height: 1.4;
+  }
+
+  .quiz-answer:hover {
+    border-color: rgba(167, 139, 250, 0.4);
+    background: rgba(167, 139, 250, 0.05);
+    color: var(--text);
+  }
+
+  .quiz-answer.selected {
+    border-color: var(--primary);
+    background: rgba(167, 139, 250, 0.1);
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .quiz-next-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity 0.15s;
+  }
+
+  .quiz-next-btn:hover {
+    opacity: 0.8;
+  }
+
+  /* ── Result ── */
+  .quiz-result {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(167, 139, 250, 0.05));
+    border-top: none;
+  }
+
+  .quiz-result-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin: 0 0 8px;
+  }
+
+  .quiz-result-headline {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .quiz-result-body {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin: 0 0 18px;
+  }
+
+  .quiz-result-cta {
+    display: inline-block;
+    padding: 11px 22px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: #fff;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 700;
+    border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .quiz-result-cta:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 480px) {
+    .quiz-step {
+      padding: 18px 18px;
+    }
+  }
+</style>
