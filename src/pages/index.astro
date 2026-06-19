@@ -11,7 +11,8 @@ const latestArticles = allArticles
   .sort((a, b) =>
     new Date(b.data.generatedAt ?? '').getTime() -
     new Date(a.data.generatedAt ?? '').getTime()
-  );
+  )
+  .slice(0, 6);
 
 const useCases = [
   {
