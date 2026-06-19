@@ -7,11 +7,11 @@ const SCREENSHOT = '/images/screenshots/crushcue-analysis-withdrawal.png';
 
 const allArticles = await getCollection('seo');
 const latestArticles = allArticles
+  .filter(a => a.data.status === 'published')
   .sort((a, b) =>
     new Date(b.data.generatedAt ?? '').getTime() -
     new Date(a.data.generatedAt ?? '').getTime()
-  )
-  .slice(0, 6);
+  );
 
 const useCases = [
   {
